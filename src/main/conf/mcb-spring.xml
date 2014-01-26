@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+    <!-- This bean represents an authentication submodule -->
+    <bean id="mcb.usernamepassword" class="edu.internet2.middleware.assurance.mcb.authn.provider.JAASLoginSubmodule">
+        <constructor-arg index="0" value="/opt/shibboleth-idp/conf/login.config" /> <!-- The JAAS configuration file -->
+        <constructor-arg index="1" value="MCBUserPassAuth" /> <!-- The JAAS configuration name -->
+        <constructor-arg index="2" value="jaaslogin.vm" />  <!-- The login page to display -->
+        <constructor-arg index="3" value="false" />  <!-- Set to true if using JSP login page (parameter defaults to false if not supplied) -->
+    </bean>
+
+    <!-- This bean represents an authentication submodule -->
+    <bean id="mcb.usernamepasswordbronze" class="edu.internet2.middleware.assurance.mcb.authn.provider.JAASLoginSubmodule">
+        <constructor-arg index="0" value="/opt/shibboleth-idp/conf/login.config" />
+        <constructor-arg index="1" value="MCBUserPassAuth" />
+        <constructor-arg index="2" value="jaasloginbronze.vm" />
+    </bean>
+
+    <!-- This bean represents an authentication submodule -->
+    <bean id="mcb.usernamepasswordsilver" class="edu.internet2.middleware.assurance.mcb.authn.provider.RemoteUserSubmodule">
+        <constructor-arg index="0" value="/Authn/MCB/RemoteUser" />
+    </bean>
+
+    <!-- This bean represents an authentication submodule -->
+    <bean id="mcb.token" class="edu.internet2.middleware.assurance.mcb.authn.provider.TokenLoginSubmodule">
+    </bean>
+
+    <!-- This bean is our configuration object representing the custom configuration file -->
+    <bean id="mcb.Configuration" class="edu.internet2.middleware.assurance.mcb.authn.provider.MCBConfiguration">
+        <constructor-arg
+            value="/opt/shibboleth-idp/conf/multi-context-broker.xml" />
+        <constructor-arg>
+            <list>
+                <ref bean="mcb.usernamepassword" />
+                <ref bean="mcb.usernamepasswordbronze" />
+                <ref bean="mcb.usernamepasswordsilver" />
+                <ref bean="mcb.token" />
+            </list>
+        </constructor-arg>
+        
+    </bean>
+
+    <!-- This bean places the configuration bean into the Servlet space -->
+    <bean id="mcb.ServletAttributeExporter" class="edu.internet2.middleware.shibboleth.common.config.service.ServletContextAttributeExporter"
+        depends-on="mcb.Configuration" init-method="initialize">
+        <constructor-arg>
+            <list>
+                <value>mcb.Configuration</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+</beans>

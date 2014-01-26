@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="MultiContextBroker">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="velocityPropertiesFile" />
+                <xs:element ref="initialAuthContext" />
+                <xs:element ref="idms" />
+                <xs:element ref="maxFailures" />
+                <xs:element ref="principalAuthnContextRequired" />
+                <xs:element ref="authnContexts" />
+                <xs:element ref="authMethods" />
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="initialAuthContext">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="context" />
+            </xs:sequence>
+            <xs:attribute name="requestedOnly" type="xs:boolean" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="velocityPropertiesFile" type="xs:string" />
+    <xs:element name="idms">
+        <xs:complexType>
+            <xs:attribute name="attributeResolverID" use="required" type="xs:NCName" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="principalAuthnContextRequired" type="xs:boolean" />
+    <xs:element name="maxFailures" type="xs:int" />
+    <xs:element name="authnContexts">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="context" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="authMethods">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="method" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="method">
+        <xs:complexType mixed="true">
+            <xs:attribute name="name" use="required" type="xs:NCName" />
+            <xs:attribute name="bean" use="required" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="context">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="1" ref="allowedContexts" />
+            </xs:sequence>
+            <xs:attribute name="method" type="xs:NCName" />
+            <xs:attribute name="name" type="xs:anyURI" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="allowedContexts">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="context" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

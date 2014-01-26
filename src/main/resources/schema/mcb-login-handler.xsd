@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema targetNamespace="edu:internet2:middleware:assurance:mcb" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:ph="urn:mace:shibboleth:2.0:idp:profile-handler"
+    elementFormDefault="qualified">
+
+    <xsd:import namespace="urn:mace:shibboleth:2.0:idp:profile-handler"
+            schemaLocation="classpath:/schema/shibboleth-2.0-idp-profile-handler.xsd" />
+    
+    <xsd:complexType name="MultiContextBroker">
+        <xsd:complexContent>
+            <xsd:extension base="ph:LoginHandlerType">
+<!--                 <xsd:attribute name="authenticationServletURL" type="xsd:string"> -->
+<!--                     <xsd:annotation> -->
+<!--                         <xsd:documentation> -->
+<!--                             The servlet context path to the -->
+<!--                             MCBUsernamePasswordLoginServlet -->
+<!--                             that will authenticate the user. -->
+<!--                         </xsd:documentation> -->
+<!--                     </xsd:annotation> -->
+<!--                 </xsd:attribute> -->
+                <xsd:attribute name="previousSession" type="xsd:boolean">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            If true, previous sessions are supported by this handler.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="depends-on" type="xsd:string">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Any beans this handler depends on. Currently the MCB Configuration bean.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+</xsd:schema>
