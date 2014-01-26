@@ -1,0 +1,10 @@
+This software uses various copyrighted code and libraries. This file acknowledges their inclusion.
+
+This project uses software developed and copyrighted by The Shibboleth Consortium (http://shibboleth.net).
+
+This project uses software developed and copyrighted by Internet2 (http://internet2.edu).
+
+This project uses software developed and copyrighted by University Corporation for Advanced Internet Development, Inc.
+
+All copyrights and ownership of contributed items remain with their owners.
+
