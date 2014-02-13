@@ -57,7 +57,7 @@ import edu.internet2.middleware.shibboleth.idp.util.HttpServletHelper;
  */
 public class MCBLoginServlet extends HttpServlet {
 
-	public static final String VERSION = "1.0.1 -- 2014-02-11";
+	public static final String VERSION = "1.0.0 -- 2014-01-05";
 	/**
 	 * Serial UID 
 	 */
@@ -327,9 +327,6 @@ public class MCBLoginServlet extends HttpServlet {
 			//userSession.setAttribute(CONTEXT_PARAM_NAME, contextUsed);
 			
 			b = sub.displayLogin(this, request, response);
-			// must remove any attributes set for the submodule
-			request.getSession().removeAttribute(MCBLoginServlet.FORCE_REAUTH);
-			request.getSession().removeAttribute(MCBLoginServlet.UPGRADE_AUTH);
 			log.debug("submodule display login returned [{}]", b);
 			return true;
 		} catch (Exception e) {
@@ -372,9 +369,6 @@ public class MCBLoginServlet extends HttpServlet {
 				//userSession.setAttribute(CONTEXT_PARAM_NAME, contextUsed);
 
 				boolean b = sub.displayLogin(this, request, response);
-				// must remove any attributes we sent to the submodule
-    			request.getSession().removeAttribute(MCBLoginServlet.FORCE_REAUTH);
-    			request.getSession().removeAttribute(MCBLoginServlet.UPGRADE_AUTH);
 				log.debug("submodule display login returned [{}]", b);
 				return true;
     		} catch (Exception e) {
@@ -441,9 +435,6 @@ public class MCBLoginServlet extends HttpServlet {
 					userSession.setAttribute(PERFORM_AUTHENTICATION_PARAM_NAME, Boolean.TRUE);
 					
 	    			boolean b = sub.displayLogin(this, request, response);
-	    			// must remove any attributes we sent to the submodule
-	    			request.getSession().removeAttribute(MCBLoginServlet.FORCE_REAUTH);
-	    			request.getSession().removeAttribute(MCBLoginServlet.UPGRADE_AUTH);
 					log.debug("submodule returned [{}]", b);
 	    			return;
     			} catch (Exception e) {
@@ -486,9 +477,6 @@ public class MCBLoginServlet extends HttpServlet {
 					userSession.setAttribute(PERFORM_AUTHENTICATION_PARAM_NAME, Boolean.TRUE);
 					
 	    			boolean b = sub.displayLogin(this, request, response);
-	    			// must remove any attributes we set for the submodule
-	    			request.getSession().removeAttribute(MCBLoginServlet.FORCE_REAUTH);
-	    			request.getSession().removeAttribute(MCBLoginServlet.UPGRADE_AUTH);
 					log.debug("submodule returned [{}]", b);
 	    			return;
     			} catch (Exception e) {
@@ -582,9 +570,6 @@ public class MCBLoginServlet extends HttpServlet {
 				userSession.setAttribute(PERFORM_AUTHENTICATION_PARAM_NAME, Boolean.TRUE);
     			
     			boolean b = sub.displayLogin(this, request, response);
-    			// must remove any attributes set for the submodule
-    			request.getSession().removeAttribute(MCBLoginServlet.FORCE_REAUTH);
-    			request.getSession().removeAttribute(MCBLoginServlet.UPGRADE_AUTH);
 				userSession.setAttribute(SUBMODULE_PARAM_NAME, sub); // store the submodule we used
 				log.debug("submodule returned [{}]", b);
     			return;
