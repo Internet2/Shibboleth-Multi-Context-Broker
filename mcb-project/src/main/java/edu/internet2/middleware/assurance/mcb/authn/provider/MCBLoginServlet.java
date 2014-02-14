@@ -675,7 +675,16 @@ public class MCBLoginServlet extends HttpServlet {
      */
     public void doVelocity(HttpServletRequest request, HttpServletResponse response, String templateName, VelocityContext vCtx) throws AuthenticationException {
         vCtx.put("actionUrl", request.getContextPath() + request.getServletPath());
-
+		
+		IDPUIHandler vHandler = new IDPUIHandler(request, getServletContext());
+		
+		//insert the UI elements
+		vCtx.put("UILogo",vHandler.getServiceLogoURL());
+		vCtx.put("UIDescription", vHandler.getServiceDescription());
+		vCtx.put("UIName",vHandler.getServiceName());
+		vCtx.put("UIPrivacyURL", vHandler.getPrivacyURL());
+		vCtx.put("UIInfoURL", vHandler.getInformationURL());
+		
         response.setContentType("text/html");
         response.setHeader("Cache-Control", "content=\"no-store,no-cache,must-revalidate\"");
         response.setHeader("Pragma","no-cache");
