@@ -58,7 +58,6 @@ public class IDPUIHandler extends ServiceTagSupport{
 		lang = request.getLocale().getLanguage();
 	}
 	
-	@Override
 	protected EntityDescriptor getSPEntityDescriptor() {
 		LoginContext loginContext;
         RelyingPartyConfigurationManager rpConfigMngr;
