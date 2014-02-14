@@ -58,6 +58,7 @@ public class IDPUIHandler extends ServiceTagSupport{
 		lang = request.getLocale().getLanguage();
 	}
 	
+	@Override
 	protected EntityDescriptor getSPEntityDescriptor() {
 		LoginContext loginContext;
         RelyingPartyConfigurationManager rpConfigMngr;
@@ -86,11 +87,13 @@ public class IDPUIHandler extends ServiceTagSupport{
 	 * @return description or null
 	 */
 	public String getServiceDescription() {
-		for (Description desc : info.getDescriptions()) {
-			log.debug("Found description in UIInfo, language=" + desc.getXMLLang());
-			if (desc.getXMLLang().equals(lang)) {
-				log.debug("returning description from UIInfo " + desc.getName().getLocalString());
-				return desc.getName().getLocalString();
+		if (info != null) {
+			for (Description desc : info.getDescriptions()) {
+				log.debug("Found description in UIInfo, language=" + desc.getXMLLang());
+				if (desc.getXMLLang().equals(lang)) {
+					log.debug("returning description from UIInfo " + desc.getName().getLocalString());
+					return desc.getName().getLocalString();
+				}
 			}
 		}
 		return null;
@@ -101,12 +104,14 @@ public class IDPUIHandler extends ServiceTagSupport{
 	 * @return service name or null
 	 */
 	public String getServiceName(){
-		for(DisplayName name: info.getDisplayNames()){
-			log.debug("Found service name in UIInfo, language="+name.getXMLLang());
-			
-			if(name.getXMLLang().equals(lang)){
-				log.debug("returning service name from UIInfo "+name.getName().getLocalString());
-				return name.getName().getLocalString();
+		if (info != null) {
+			for (DisplayName name : info.getDisplayNames()) {
+				log.debug("Found service name in UIInfo, language=" + name.getXMLLang());
+
+				if (name.getXMLLang().equals(lang)) {
+					log.debug("returning service name from UIInfo " + name.getName().getLocalString());
+					return name.getName().getLocalString();
+				}
 			}
 		}
 		
@@ -118,12 +123,14 @@ public class IDPUIHandler extends ServiceTagSupport{
 	 * @return Logo URL or null
 	 */
 	public String getServiceLogoURL(){
-		for(Logo logo: info.getLogos()){
-			log.debug("Found Logo in UIInfo, language="+logo.getXMLLang());
-			
-			if(logo.getXMLLang().equals(lang)){
-				log.debug("returning logo from UIInfo "+logo.getURL());
-				return logo.getURL();
+		if (info != null) {
+			for (Logo logo : info.getLogos()) {
+				log.debug("Found Logo in UIInfo, language=" + logo.getXMLLang());
+
+				if (logo.getXMLLang().equals(lang)) {
+					log.debug("returning logo from UIInfo " + logo.getURL());
+					return logo.getURL();
+				}
 			}
 		}
 		return null;
@@ -134,15 +141,16 @@ public class IDPUIHandler extends ServiceTagSupport{
 	 * @return information URL as a string or null 
 	 */
 	public String getInformationURL(){
-		for(InformationURL url: info.getInformationURLs()){
-			log.debug("Found information URL in UIInfo, language="+url.getXMLLang());
-			
-			if(url.getXMLLang().equals(lang)){
-				log.debug("returning information URL, language="+url.getXMLLang());
-				return url.getURI().getLocalString();
+		if (info != null) {
+			for (InformationURL url : info.getInformationURLs()) {
+				log.debug("Found information URL in UIInfo, language=" + url.getXMLLang());
+
+				if (url.getXMLLang().equals(lang)) {
+					log.debug("returning information URL, language=" + url.getXMLLang());
+					return url.getURI().getLocalString();
+				}
 			}
 		}
-		
 		return null;
 	}
 	
@@ -151,12 +159,14 @@ public class IDPUIHandler extends ServiceTagSupport{
 	 * @return privacy policy URL or null
 	 */
 	public String getPrivacyURL(){
-		for(PrivacyStatementURL url: info.getPrivacyStatementURLs()){
-			log.debug("Found privacy URL in UIInfo, language="+url.getXMLLang());
-			
-			if(url.getXMLLang().equals(lang)){
-				log.debug("returning privacy URL, language="+url.getXMLLang());
-				return url.getURI().getLocalString();
+		if (info != null) {
+			for (PrivacyStatementURL url : info.getPrivacyStatementURLs()) {
+				log.debug("Found privacy URL in UIInfo, language=" + url.getXMLLang());
+
+				if (url.getXMLLang().equals(lang)) {
+					log.debug("returning privacy URL, language=" + url.getXMLLang());
+					return url.getURI().getLocalString();
+				}
 			}
 		}
 		
