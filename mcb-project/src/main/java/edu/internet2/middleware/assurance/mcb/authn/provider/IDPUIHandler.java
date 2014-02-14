@@ -58,6 +58,11 @@ public class IDPUIHandler extends ServiceTagSupport{
 		info = getSPUIInfo();
 	}
 	
+	/**
+	 * Overrides ServiceTagSupport's version as we are being passed some of the stuff
+	 * that the super class expects to have already
+	 * @return the EntittyDescriptor
+	 */
 	protected EntityDescriptor getSPEntityDescriptor() {
 		LoginContext loginContext;
         RelyingPartyConfigurationManager rpConfigMngr;
