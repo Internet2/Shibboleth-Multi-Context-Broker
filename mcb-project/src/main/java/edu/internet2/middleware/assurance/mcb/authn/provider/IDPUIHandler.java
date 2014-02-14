@@ -16,8 +16,13 @@
 
 package edu.internet2.middleware.assurance.mcb.authn.provider;
 
+import edu.internet2.middleware.shibboleth.common.relyingparty.RelyingPartyConfigurationManager;
+import edu.internet2.middleware.shibboleth.idp.authn.LoginContext;
 import edu.internet2.middleware.shibboleth.idp.ui.ServiceTagSupport;
+import edu.internet2.middleware.shibboleth.idp.util.HttpServletHelper;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.samlext.saml2mdui.Description;
 import org.opensaml.samlext.saml2mdui.DisplayName;
 import org.opensaml.samlext.saml2mdui.InformationURL;
@@ -37,18 +42,45 @@ public class IDPUIHandler extends ServiceTagSupport{
 	private final Logger log = LoggerFactory.getLogger(IDPUIHandler.class);	
 	private UIInfo info;
 	private String lang;
+	private HttpServletRequest request;
+	private ServletContext application;
 	
 	/**
 	 * Constructor
-	 * @param request the servlet request 
+	 * @param req the servlet request 
 	 */
-	public IDPUIHandler(HttpServletRequest request){
+	public IDPUIHandler(HttpServletRequest req, ServletContext ctx){
 		super();
+		request = req;
+		application = ctx;
 		log.debug("target language is "+lang);
 		info = getSPUIInfo();
 		lang = request.getLocale().getLanguage();
 	}
 	
+	protected EntityDescriptor getSPEntityDescriptor() {
+		LoginContext loginContext;
+        RelyingPartyConfigurationManager rpConfigMngr;
+        EntityDescriptor spEntity;
+
+        if (request == null || application == null) {
+            return null;
+        }
+        //
+        // grab the login context and the RP config mgr.
+        //
+        loginContext =
+                HttpServletHelper.getLoginContext(HttpServletHelper.getStorageService(application), application,
+                        request);
+        rpConfigMngr = HttpServletHelper.getRelyingPartyConfigurationManager(application);
+        if (loginContext == null || rpConfigMngr == null) {
+            return null;
+        }
+        spEntity = HttpServletHelper.getRelyingPartyMetadata(loginContext.getRelyingPartyId(), rpConfigMngr);
+
+        return spEntity;
+		
+	}
 	/**
 	 * Service description
 	 * @return description or null
