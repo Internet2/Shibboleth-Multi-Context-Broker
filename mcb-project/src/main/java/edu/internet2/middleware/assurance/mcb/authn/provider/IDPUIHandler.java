@@ -53,9 +53,9 @@ public class IDPUIHandler extends ServiceTagSupport{
 		super();
 		request = req;
 		application = ctx;
+		lang = request.getLocale().getLanguage();
 		log.debug("target language is "+lang);
 		info = getSPUIInfo();
-		lang = request.getLocale().getLanguage();
 	}
 	
 	protected EntityDescriptor getSPEntityDescriptor() {
