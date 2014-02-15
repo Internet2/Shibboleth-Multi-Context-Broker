@@ -22,13 +22,17 @@ import edu.internet2.middleware.shibboleth.idp.ui.ServiceTagSupport;
 import edu.internet2.middleware.shibboleth.idp.util.HttpServletHelper;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import org.opensaml.saml2.common.Extensions;
 import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml2.metadata.RoleDescriptor;
+import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.samlext.saml2mdui.Description;
 import org.opensaml.samlext.saml2mdui.DisplayName;
 import org.opensaml.samlext.saml2mdui.InformationURL;
 import org.opensaml.samlext.saml2mdui.Logo;
 import org.opensaml.samlext.saml2mdui.PrivacyStatementURL;
 import org.opensaml.samlext.saml2mdui.UIInfo;
+import org.opensaml.xml.XMLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * Velocity templates
  * @author David Langenberg <davel@uchicago.edu>
  */
-public class IDPUIHandler extends ServiceTagSupport{
+public class IDPUIHandler{
 	
 	private final Logger log = LoggerFactory.getLogger(IDPUIHandler.class);	
 	private UIInfo info;
@@ -59,6 +63,37 @@ public class IDPUIHandler extends ServiceTagSupport{
 	}
 	
 	/**
+     * Traverse the SP's EntityDescriptor and pick out the UIInfo.
+     * 
+     * @return the first UIInfo for the SP.
+     */
+    private UIInfo getSPUIInfo() {
+        EntityDescriptor spEntity = getSPEntityDescriptor();
+        Extensions exts;
+
+        if (null == spEntity) {
+			log.debug("spEntity is null");
+            //
+            // all done
+            //
+            return null;
+        }
+
+        for (RoleDescriptor role : spEntity.getRoleDescriptors(SPSSODescriptor.DEFAULT_ELEMENT_NAME)) {
+            exts = role.getExtensions();
+            if (exts != null) {
+                for (XMLObject object : exts.getOrderedChildren()) {
+                    if (object instanceof UIInfo) {
+                        return (UIInfo) object;
+                    }
+                }
+            }
+        }
+		log.debug("no UI info in EntityDescriptor {}", spEntity.getEntityID());
+        return null;
+    }
+	
+	/**
 	 * Overrides ServiceTagSupport's version as we are being passed some of the stuff
 	 * that the super class expects to have already
 	 * @return the EntittyDescriptor
@@ -68,9 +103,6 @@ public class IDPUIHandler extends ServiceTagSupport{
         RelyingPartyConfigurationManager rpConfigMngr;
         EntityDescriptor spEntity;
 
-        if (request == null || application == null) {
-            return null;
-        }
         //
         // grab the login context and the RP config mgr.
         //
@@ -82,10 +114,25 @@ public class IDPUIHandler extends ServiceTagSupport{
             return null;
         }
         spEntity = HttpServletHelper.getRelyingPartyMetadata(loginContext.getRelyingPartyId(), rpConfigMngr);
-
+		log.debug("SPEntity is {}", spEntity.getEntityID());
         return spEntity;
 		
 	}
+	
+	/**
+	 * Get the EntityID of the SP
+	 * @return entityID of the SP or null
+	 */
+	public String getEntityID(){
+		EntityDescriptor entity = getSPEntityDescriptor();
+		
+		if(getSPEntityDescriptor() != null){
+			return entity.getEntityID();
+		}
+		
+		return null;
+	}
+	
 	/**
 	 * Service description
 	 * @return description or null
@@ -93,9 +140,9 @@ public class IDPUIHandler extends ServiceTagSupport{
 	public String getServiceDescription() {
 		if (info != null) {
 			for (Description desc : info.getDescriptions()) {
-				log.debug("Found description in UIInfo, language=" + desc.getXMLLang());
+				log.debug("Found description in UIInfo, language={}", desc.getXMLLang());
 				if (desc.getXMLLang().equals(lang)) {
-					log.debug("returning description from UIInfo " + desc.getName().getLocalString());
+					log.debug("returning description from UIInfo {}", desc.getName().getLocalString());
 					return desc.getName().getLocalString();
 				}
 			}
@@ -110,10 +157,10 @@ public class IDPUIHandler extends ServiceTagSupport{
 	public String getServiceName(){
 		if (info != null) {
 			for (DisplayName name : info.getDisplayNames()) {
-				log.debug("Found service name in UIInfo, language=" + name.getXMLLang());
+				log.debug("Found service name in UIInfo, language={}", name.getXMLLang());
 
 				if (name.getXMLLang().equals(lang)) {
-					log.debug("returning service name from UIInfo " + name.getName().getLocalString());
+					log.debug("returning service name from UIInfo {}", name.getName().getLocalString());
 					return name.getName().getLocalString();
 				}
 			}
@@ -129,10 +176,10 @@ public class IDPUIHandler extends ServiceTagSupport{
 	public String getServiceLogoURL(){
 		if (info != null) {
 			for (Logo logo : info.getLogos()) {
-				log.debug("Found Logo in UIInfo, language=" + logo.getXMLLang());
+				log.debug("Found Logo in UIInfo, language={}", logo.getXMLLang());
 
 				if (logo.getXMLLang().equals(lang)) {
-					log.debug("returning logo from UIInfo " + logo.getURL());
+					log.debug("returning logo from UIInfo {}", logo.getURL());
 					return logo.getURL();
 				}
 			}
@@ -147,10 +194,10 @@ public class IDPUIHandler extends ServiceTagSupport{
 	public String getInformationURL(){
 		if (info != null) {
 			for (InformationURL url : info.getInformationURLs()) {
-				log.debug("Found information URL in UIInfo, language=" + url.getXMLLang());
+				log.debug("Found information URL in UIInfo, language={}", url.getXMLLang());
 
 				if (url.getXMLLang().equals(lang)) {
-					log.debug("returning information URL, language=" + url.getXMLLang());
+					log.debug("returning information URL {}", url.getURI().getLocalString());
 					return url.getURI().getLocalString();
 				}
 			}
@@ -165,10 +212,10 @@ public class IDPUIHandler extends ServiceTagSupport{
 	public String getPrivacyURL(){
 		if (info != null) {
 			for (PrivacyStatementURL url : info.getPrivacyStatementURLs()) {
-				log.debug("Found privacy URL in UIInfo, language=" + url.getXMLLang());
+				log.debug("Found privacy URL in UIInfo, language={}", url.getXMLLang());
 
 				if (url.getXMLLang().equals(lang)) {
-					log.debug("returning privacy URL, language=" + url.getXMLLang());
+					log.debug("returning privacy URL, {}",url.getURI().getLocalString());
 					return url.getURI().getLocalString();
 				}
 			}

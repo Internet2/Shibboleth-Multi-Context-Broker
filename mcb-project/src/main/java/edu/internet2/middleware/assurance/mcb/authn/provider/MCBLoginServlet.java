@@ -684,6 +684,7 @@ public class MCBLoginServlet extends HttpServlet {
 		vCtx.put("UIName",vHandler.getServiceName());
 		vCtx.put("UIPrivacyURL", vHandler.getPrivacyURL());
 		vCtx.put("UIInfoURL", vHandler.getInformationURL());
+		vCtx.put("UIEntityID", vHandler.getEntityID());
 		
         response.setContentType("text/html");
         response.setHeader("Cache-Control", "content=\"no-store,no-cache,must-revalidate\"");
