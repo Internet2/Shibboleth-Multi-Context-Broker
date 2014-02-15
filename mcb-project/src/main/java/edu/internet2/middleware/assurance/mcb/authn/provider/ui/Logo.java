@@ -20,60 +20,66 @@ import org.owasp.esapi.Encoder;
 
 /**
  * This class handles the UI logo.
+ *
  * @author David Langenberg <davel@uchicago.edu>
  */
 public class Logo {
-	
-	private org.opensaml.samlext.saml2mdui.Logo logo;
-	
-	private Encoder enc;
-	
-	/**
-	 * Constructor -- takes a Logo of the language the page should be displayed in 
-	 * @param l logo
-	 */
-	public Logo(org.opensaml.samlext.saml2mdui.Logo l){
-		logo = l;
-		enc = ESAPI.encoder();
-	}
-	
-	/**
-	 * Gets the URL of the logo.  Passes it through the OWASP canonicalizer & encoder
-	 * first to ensure it's safe for inclusion in a src= attribute
-	 * @return encoded URL
-	 */
-	public String getURL(){
-		return enc.encodeForHTMLAttribute(enc.canonicalize(logo.getURL()));
-	}
-	
-	/**
-	 * Gets the width of the image from metadata
-	 * @return encoded width value
-	 */
-	public String getWidth(){
-		return enc.encodeForHTMLAttribute(logo.getWidth().toString());
-	}
-	
-	/**
-	 * Gets the height of the image from metadata
-	 * @return encoded height value
-	 */
-	public String getHeight(){
-		return enc.encodeForHTMLAttribute(logo.getHeight().toString());
-	}
-	
-	@Override
-	public String toString(){
-		StringBuilder sb = new StringBuilder();
-		sb.append("<img src=\"");
-		sb.append(getURL());
-		sb.append("\" height=\"");
-		sb.append(logo.getHeight());
-		sb.append("\" width=\"");
-		sb.append(logo.getWidth());
-		sb.append("\" alt=\"Service Logo\" />");
-		
-		return sb.toString();
-	}
-	
+
+    private org.opensaml.samlext.saml2mdui.Logo logo;
+
+    private Encoder enc;
+
+    /**
+     * Constructor -- takes a Logo of the language the page should be displayed
+     * in
+     *
+     * @param l logo
+     */
+    public Logo(org.opensaml.samlext.saml2mdui.Logo l) {
+        logo = l;
+        enc = ESAPI.encoder();
+    }
+
+    /**
+     * Gets the URL of the logo. Passes it through the OWASP canonicalizer &
+     * encoder first to ensure it's safe for inclusion in a src= attribute
+     *
+     * @return encoded URL
+     */
+    public String getURL() {
+        return enc.encodeForHTMLAttribute(enc.canonicalize(logo.getURL()));
+    }
+
+    /**
+     * Gets the width of the image from metadata
+     *
+     * @return encoded width value
+     */
+    public String getWidth() {
+        return enc.encodeForHTMLAttribute(logo.getWidth().toString());
+    }
+
+    /**
+     * Gets the height of the image from metadata
+     *
+     * @return encoded height value
+     */
+    public String getHeight() {
+        return enc.encodeForHTMLAttribute(logo.getHeight().toString());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<img src=\"");
+        sb.append(getURL());
+        sb.append("\" height=\"");
+        sb.append(logo.getHeight());
+        sb.append("\" width=\"");
+        sb.append(logo.getWidth());
+        sb.append("\" alt=\"Service Logo\" />");
+
+        return sb.toString();
+    }
+
 }
