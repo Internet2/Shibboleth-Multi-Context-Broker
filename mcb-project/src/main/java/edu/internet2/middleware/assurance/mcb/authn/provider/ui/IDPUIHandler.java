@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package edu.internet2.middleware.assurance.mcb.authn.provider;
+package edu.internet2.middleware.assurance.mcb.authn.provider.ui;
 
 import edu.internet2.middleware.shibboleth.common.relyingparty.RelyingPartyConfigurationManager;
 import edu.internet2.middleware.shibboleth.idp.authn.LoginContext;
@@ -176,14 +176,14 @@ public class IDPUIHandler{
 	 * Get the URL of the service logo
 	 * @return Logo URL or null
 	 */
-	public String getServiceLogoURL(){
+	public Logo getServiceLogo(){
 		if (info != null) {
 			for (Logo logo : info.getLogos()) {
 				log.debug("Found Logo in UIInfo, language={}", logo.getXMLLang());
 
 				if (logo.getXMLLang().equals(lang)) {
 					log.debug("returning logo from UIInfo {}", logo.getURL());
-					return logo.getURL();
+					return logo;
 				}
 			}
 		}

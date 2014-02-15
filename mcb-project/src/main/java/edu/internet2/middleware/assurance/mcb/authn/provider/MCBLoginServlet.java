@@ -16,6 +16,7 @@
 
 package edu.internet2.middleware.assurance.mcb.authn.provider;
 
+import edu.internet2.middleware.assurance.mcb.authn.provider.ui.IDPUIHandler;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -679,7 +680,7 @@ public class MCBLoginServlet extends HttpServlet {
 		IDPUIHandler vHandler = new IDPUIHandler(request, getServletContext());
 		
 		//insert the UI elements
-		vCtx.put("UILogo",vHandler.getServiceLogoURL());
+		vCtx.put("UILogo",vHandler.getServiceLogo());
 		vCtx.put("UIDescription", vHandler.getServiceDescription());
 		vCtx.put("UIName",vHandler.getServiceName());
 		vCtx.put("UIPrivacyURL", vHandler.getPrivacyURL());
