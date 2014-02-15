@@ -17,6 +17,7 @@
  */
 package edu.internet2.middleware.assurance.mcb.authn.provider;
 
+import edu.internet2.middleware.assurance.mcb.authn.provider.ui.IDPUIHandler;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -41,12 +42,12 @@ import org.opensaml.xml.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.internet2.middleware.assurance.mcb.authn.provider.ui.IDPUIHandler;
 import edu.internet2.middleware.assurance.mcb.config.Method;
 import edu.internet2.middleware.shibboleth.common.attribute.BaseAttribute;
 import edu.internet2.middleware.shibboleth.idp.authn.AuthenticationEngine;
 import edu.internet2.middleware.shibboleth.idp.authn.AuthenticationException;
 import edu.internet2.middleware.shibboleth.idp.authn.LoginHandler;
+import edu.internet2.middleware.shibboleth.idp.authn.PassiveAuthenticationException;
 import edu.internet2.middleware.shibboleth.idp.authn.Saml2LoginContext;
 import edu.internet2.middleware.shibboleth.idp.util.HttpServletHelper;
 
