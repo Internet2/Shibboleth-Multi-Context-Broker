@@ -676,7 +676,7 @@ public class MCBLoginServlet extends HttpServlet {
     public void doVelocity(HttpServletRequest request, HttpServletResponse response, String templateName, VelocityContext vCtx) throws AuthenticationException {
         vCtx.put("actionUrl", request.getContextPath() + request.getServletPath());
 		
-		IDPUIHandler vHandler = new IDPUIHandler(request, getServletContext());
+        IDPUIHandler vHandler = new IDPUIHandler(request, getServletContext());
 
         //insert the UI elements
         vCtx.put("UILogo", vHandler.getServiceLogo());
