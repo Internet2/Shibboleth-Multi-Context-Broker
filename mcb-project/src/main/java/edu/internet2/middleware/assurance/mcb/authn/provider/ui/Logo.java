@@ -26,20 +26,47 @@ public class Logo {
 	
 	private org.opensaml.samlext.saml2mdui.Logo logo;
 	
+	private Encoder enc;
+	
 	/**
 	 * Constructor -- takes a Logo of the language the page should be displayed in 
 	 * @param l logo
 	 */
 	public Logo(org.opensaml.samlext.saml2mdui.Logo l){
 		logo = l;
+		enc = ESAPI.encoder();
+	}
+	
+	/**
+	 * Gets the URL of the logo.  Passes it through the OWASP canonicalizer & encoder
+	 * first to ensure it's safe for inclusion in a src= attribute
+	 * @return encoded URL
+	 */
+	public String getURL(){
+		return enc.encodeForHTMLAttribute(enc.canonicalize(logo.getURL()));
+	}
+	
+	/**
+	 * Gets the width of the image from metadata
+	 * @return encoded width value
+	 */
+	public String getWidth(){
+		return enc.encodeForHTMLAttribute(logo.getWidth().toString());
+	}
+	
+	/**
+	 * Gets the height of the image from metadata
+	 * @return encoded height value
+	 */
+	public String getHeight(){
+		return enc.encodeForHTMLAttribute(logo.getHeight().toString());
 	}
 	
 	@Override
 	public String toString(){
-		Encoder enc = ESAPI.encoder();
 		StringBuilder sb = new StringBuilder();
 		sb.append("<img src=\"");
-		sb.append(enc.encodeForHTMLAttribute(logo.getURL()));
+		sb.append(getURL());
 		sb.append("\" height=\"");
 		sb.append(logo.getHeight());
 		sb.append("\" width=\"");
