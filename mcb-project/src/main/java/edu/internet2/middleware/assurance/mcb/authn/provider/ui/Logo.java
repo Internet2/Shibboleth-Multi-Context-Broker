@@ -15,6 +15,9 @@
  */
 package edu.internet2.middleware.assurance.mcb.authn.provider.ui;
 
+import org.owasp.esapi.ESAPI;
+import org.owasp.esapi.Encoder;
+
 /**
  * This class handles the UI logo.
  * @author David Langenberg <davel@uchicago.edu>
@@ -33,9 +36,10 @@ public class Logo {
 	
 	@Override
 	public String toString(){
+		Encoder enc = ESAPI.encoder();
 		StringBuilder sb = new StringBuilder();
 		sb.append("<img src=\"");
-		sb.append(logo.getURL());
+		sb.append(enc.encodeForHTMLAttribute(logo.getURL()));
 		sb.append("\" height=\"");
 		sb.append(logo.getHeight());
 		sb.append("\" width=\"");
