@@ -17,7 +17,7 @@ package edu.internet2.middleware.assurance.mcb.authn.provider.ui;
 
 /**
  * This class handles the UI logo.
- * @author davel
+ * @author David Langenberg <davel@uchicago.edu>
  */
 public class Logo {
 	
