@@ -39,6 +39,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Class to handle getting IDPUI information so that it can be injected into 
  * Velocity templates
+ * 
+ * Contains some code taken from @seeAlso{edu.internet2.middleware.shibboleth.idp.ui.ServiceTagSupport}
+ * 
  * @author David Langenberg <davel@uchicago.edu>
  */
 public class IDPUIHandler{
