@@ -314,7 +314,14 @@ public class MCBConfiguration {
 		MethodToContext mtc = methodToContextMap.get(method);
 		if (mtc != null) {
 			log.trace("mtc = [{}]", mtc.method);
-			return mtc.contextList;
+            //since this class is statically instantiated, ensure this 
+            //method returns a new object rather than a link to the static one
+            //so that manipulations to the list do not get saved globally
+            ArrayList<String> returnMe = new ArrayList();
+            for(String aString:mtc.contextList){
+                returnMe.add(new String(aString));
+            }
+			return returnMe;
 		}
 		
 		return null;
