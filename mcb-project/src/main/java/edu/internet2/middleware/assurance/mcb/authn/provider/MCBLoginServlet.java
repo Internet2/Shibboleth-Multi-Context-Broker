@@ -57,7 +57,7 @@ import edu.internet2.middleware.shibboleth.idp.util.HttpServletHelper;
  */
 public class MCBLoginServlet extends HttpServlet {
 
-	public static final String VERSION = "1.1.0";
+	public static final String VERSION = "1.1.1";
 	/**
 	 * Serial UID 
 	 */
@@ -648,7 +648,7 @@ public class MCBLoginServlet extends HttpServlet {
 		entityDescriptor = HttpServletHelper.getRelyingPartyMetadata(loginContext.getRelyingPartyId(),
 				HttpServletHelper.getRelyingPartyConfigurationManager(application));
 		entityID = entityDescriptor.getEntityID();
-		log.debug("Getting reqeusted contexts for relying party = [{}]", entityID);
+		log.debug("Getting requested contexts for relying party = [{}]", entityID);
 		List<String> requestedContexts = loginContext.getRequestedAuthenticationMethods();
 		// we must remove the "unspecified" context, it has no meaning as a requested context
 		if (requestedContexts != null) {

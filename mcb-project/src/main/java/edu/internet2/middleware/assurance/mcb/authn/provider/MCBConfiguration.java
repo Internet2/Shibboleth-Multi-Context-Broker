@@ -317,7 +317,7 @@ public class MCBConfiguration {
             //since this class is statically instantiated, ensure this 
             //method returns a new object rather than a link to the static one
             //so that manipulations to the list do not get saved globally
-            ArrayList<String> returnMe = new ArrayList();
+            ArrayList<String> returnMe = new ArrayList<String>();
             for(String aString:mtc.contextList){
                 returnMe.add(new String(aString));
             }
