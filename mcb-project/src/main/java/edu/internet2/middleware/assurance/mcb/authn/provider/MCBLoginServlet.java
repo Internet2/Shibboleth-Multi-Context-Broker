@@ -40,12 +40,12 @@ import org.opensaml.xml.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.internet2.middleware.assurance.mcb.authn.provider.ui.IDPUIHandler;
 import edu.internet2.middleware.assurance.mcb.config.Method;
 import edu.internet2.middleware.shibboleth.common.attribute.BaseAttribute;
 import edu.internet2.middleware.shibboleth.idp.authn.AuthenticationEngine;
 import edu.internet2.middleware.shibboleth.idp.authn.AuthenticationException;
 import edu.internet2.middleware.shibboleth.idp.authn.LoginHandler;
-import edu.internet2.middleware.shibboleth.idp.authn.PassiveAuthenticationException;
 import edu.internet2.middleware.shibboleth.idp.authn.Saml2LoginContext;
 import edu.internet2.middleware.shibboleth.idp.util.HttpServletHelper;
 
@@ -57,7 +57,7 @@ import edu.internet2.middleware.shibboleth.idp.util.HttpServletHelper;
  */
 public class MCBLoginServlet extends HttpServlet {
 
-	public static final String VERSION = "1.0.1 -- 2014-02-11";
+	public static final String VERSION = "1.1.0";
 	/**
 	 * Serial UID 
 	 */
@@ -675,6 +675,16 @@ public class MCBLoginServlet extends HttpServlet {
      */
     public void doVelocity(HttpServletRequest request, HttpServletResponse response, String templateName, VelocityContext vCtx) throws AuthenticationException {
         vCtx.put("actionUrl", request.getContextPath() + request.getServletPath());
+		
+        IDPUIHandler vHandler = new IDPUIHandler(request, getServletContext());
+
+        //insert the UI elements
+        vCtx.put("UILogo", vHandler.getServiceLogo());
+        vCtx.put("UIDescription", vHandler.getServiceDescription());
+        vCtx.put("UIName", vHandler.getServiceName());
+        vCtx.put("UIPrivacyURL", vHandler.getPrivacyURL());
+        vCtx.put("UIInfoURL", vHandler.getInformationURL());
+        vCtx.put("UIEntityID", vHandler.getEntityID());
 
         response.setContentType("text/html");
         response.setHeader("Cache-Control", "content=\"no-store,no-cache,must-revalidate\"");
