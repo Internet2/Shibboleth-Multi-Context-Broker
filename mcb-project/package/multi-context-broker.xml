@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MultiContextBroker>
+
+    <velocityPropertiesFile>/opt/shibboleth-idp/conf/velocity.properties</velocityPropertiesFile>
+
+    <!--
+        Show this list of choices for initial authentication to establish a session. Optionally limit the choices
+        to those also requested by the SP. If no choices match the SP request, then show the entire list just as if
+        the SP had not requested any.
+    -->
+    <initialAuthContext requestedOnly="false">
+            <context name="urn:oasis:names:tc:SAML:2.0:ac:classes:Password" />
+            <context name="http://id.incommon.org/assurance/bronze" />
+    </initialAuthContext>
+
+    <!-- 
+            <context name="http://id.incommon.org/assurance/bronze" />
+     -->    
+    <!-- 
+        This value identifies the ID of the attribute in the Shibboleth attribute-resolver.xml file that contains the user's allowed context values.
+    -->
+    <idms attributeResolverID="assurance" />
+    
+    <!--
+        If set to FALSE, then if the user has no assigned contexts and the SP does not request one, then
+        successful authentication via the initial authentication will be returned to the SP as
+        successful. This in effect mimics the current Shibboleth behavior.
+        If set to TRUE, then a valid context for the user is always required.
+     -->
+    <principalAuthnContextRequired>true</principalAuthnContextRequired>
+    
+    <!-- 
+        The maximum number of failures allowed a user before returning a SAML failure to the
+        relying party. Must be specified according to schema definition. Set to a value of -1
+        to allow an unlimited number of login failures.
+     -->
+    <maxFailures>3</maxFailures>
+    
+    <!-- 
+        authContexts is the list of configured contexts the MCB will honor.
+     -->
+    <authnContexts>
+        <!-- 
+            For each context, the name attribute is used to match up with the values returned by the IdMS and also
+            used to match the requested authentication context sent by the SP.
+            The method attribute corresponds to the authentication method this context uses.
+         -->
+        <context name="urn:oasis:names:tc:SAML:2.0:ac:classes:Password" method="password">
+            <allowedContexts>
+                <context name="http://id.incommon.org/assurance/bronze" />
+            </allowedContexts>
+        </context>
+
+        <context name="http://id.incommon.org/assurance/bronze" method="bronze">
+            <!--
+                Note that since the bronze level allows silver and silver allows gold, means gold is acceptable here. Contexts
+                are inherited. Since two levels of silver have been configured, either is acceptable for authenticating at the
+                bronze level (but only because both are listed).
+            -->
+            <allowedContexts>
+                <context name="http://id.incommon.org/assurance/silver" />
+                <context name="http://id.incommon.org/assurance/silver-token" />
+            </allowedContexts>
+        </context>
+        
+        <context name="http://id.incommon.org/assurance/silver" method="silver">
+            <!-- 
+                allowedContexts is a list of contexts which satisfy this level as well
+             -->
+            <allowedContexts>
+                <context name="http://id.incommon.org/assurance/silver-token" />
+            </allowedContexts>
+        </context>
+
+        <context name="http://id.incommon.org/assurance/silver-token" method="token">
+            <!-- 
+                allowedContexts is a list of contexts which satisfy this level as well
+             -->
+            <allowedContexts>
+                <context name="edu:internet2:middleware:assurance:mcb:tokenpluspin" />
+            </allowedContexts>
+        </context>
+
+        <context name="edu:internet2:middleware:assurance:mcb:tokenpluspin" method="tokenpluspin" />
+            
+        
+    </authnContexts>
+    
+    <!-- 
+        authMethods is the list of authentication methods supported by the MCB
+     -->
+    <authMethods>
+        <!-- 
+            A method defines one authentication method. The name attribute corresponds to the method value
+            used in the context definition. The bean attribute is the name of the submodule bean loaded by
+            the Spring framework during Shibboleth startup. The value of the method node is the friendly name
+            used for display purposes.
+        -->
+        <method name="password" bean="mcb.usernamepassword">
+            Username/Password Only
+        </method>
+        <method name="bronze" bean="mcb.usernamepasswordbronze">
+            Bronze Level Password
+        </method>
+        <method name="silver" bean="mcb.usernamepasswordsilver">
+            Silver Assurance Level
+        </method>
+        <method name="token" bean="mcb.token">
+            Silver Assurance Level (via hardware token)
+        </method>
+        <method name="tokenpluspin" bean="mcb.tokenpluspin">
+            Gold Level - Token/PIN Required
+        </method>
+        
+    </authMethods>
+</MultiContextBroker>
