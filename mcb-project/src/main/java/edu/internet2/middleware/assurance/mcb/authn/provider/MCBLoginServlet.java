@@ -42,11 +42,12 @@ import org.slf4j.LoggerFactory;
 
 import edu.internet2.middleware.assurance.mcb.authn.provider.ui.IDPUIHandler;
 import edu.internet2.middleware.assurance.mcb.config.Method;
+import edu.internet2.middleware.assurance.mcb.exception.UserInitiatedLoginFailureException;
 import edu.internet2.middleware.shibboleth.common.attribute.BaseAttribute;
 import edu.internet2.middleware.shibboleth.idp.authn.AuthenticationEngine;
 import edu.internet2.middleware.shibboleth.idp.authn.AuthenticationException;
 import edu.internet2.middleware.shibboleth.idp.authn.LoginHandler;
-import edu.internet2.middleware.shibboleth.idp.authn.Saml2LoginContext;
+import edu.internet2.middleware.shibboleth.idp.authn.LoginContext;
 import edu.internet2.middleware.shibboleth.idp.util.HttpServletHelper;
 
 /**
@@ -57,7 +58,7 @@ import edu.internet2.middleware.shibboleth.idp.util.HttpServletHelper;
  */
 public class MCBLoginServlet extends HttpServlet {
 
-	public static final String VERSION = "1.1.1";
+	public static final String VERSION = "1.1.2 (2014-04-11)";
 	/**
 	 * Serial UID 
 	 */
@@ -103,7 +104,7 @@ public class MCBLoginServlet extends HttpServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
             IOException {
     	ServletContext application = null;
-    	Saml2LoginContext loginContext = null;
+    	LoginContext loginContext = null;
     	EntityDescriptor entityDescriptor = null;
     	String entityID = null;
     	String selectedMethodName = null;
@@ -121,7 +122,7 @@ public class MCBLoginServlet extends HttpServlet {
     	log.debug("principal = [{}]", principal);
     	
 		application = this.getServletContext();
-		loginContext = (Saml2LoginContext)HttpServletHelper.getLoginContext(HttpServletHelper.getStorageService(application),
+		loginContext = (LoginContext)HttpServletHelper.getLoginContext(HttpServletHelper.getStorageService(application),
 				application, request);
 		entityDescriptor = HttpServletHelper.getRelyingPartyMetadata(loginContext.getRelyingPartyId(),
 				HttpServletHelper.getRelyingPartyConfigurationManager(application));
@@ -332,6 +333,15 @@ public class MCBLoginServlet extends HttpServlet {
 			request.getSession().removeAttribute(MCBLoginServlet.UPGRADE_AUTH);
 			log.debug("submodule display login returned [{}]", b);
 			return true;
+		} catch (UserInitiatedLoginFailureException uilfe) {
+			// this is meant to capture an expected failure that ends the login cycle
+			// it does not log at error level or generate a stack trace
+			log.debug("User initiated login failure caught. {}",uilfe.getMessage());
+			AuthenticationException ae = new AuthenticationException("User initiated login failure during authentication.");
+        	request.setAttribute(LoginHandler.AUTHENTICATION_EXCEPTION_KEY, ae);
+        	// send them back with a SAML error
+            AuthenticationEngine.returnToAuthenticationEngine(request, response);
+            return true;
 		} catch (Exception e) {
 			log.error("Exception calling submodule.", e);
 			AuthenticationException ae = new AuthenticationException("Exception during authentication.");
@@ -638,12 +648,12 @@ public class MCBLoginServlet extends HttpServlet {
      */
     private List<String> getRequestedContexts(HttpServletRequest request) {
     	ServletContext application = null;
-    	Saml2LoginContext loginContext = null;
+    	LoginContext loginContext = null;
     	EntityDescriptor entityDescriptor = null;
     	String entityID = null;
 
 		application = this.getServletContext();
-		loginContext = (Saml2LoginContext)HttpServletHelper.getLoginContext(HttpServletHelper.getStorageService(application),
+		loginContext = (LoginContext)HttpServletHelper.getLoginContext(HttpServletHelper.getStorageService(application),
 				application, request);
 		entityDescriptor = HttpServletHelper.getRelyingPartyMetadata(loginContext.getRelyingPartyId(),
 				HttpServletHelper.getRelyingPartyConfigurationManager(application));
