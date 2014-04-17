@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.internet2.middleware.shibboleth.idp.authn.AuthenticationEngine;
+import edu.internet2.middleware.shibboleth.idp.authn.LoginContext;
 import edu.internet2.middleware.shibboleth.idp.authn.LoginHandler;
 import edu.internet2.middleware.shibboleth.idp.authn.PassiveAuthenticationException;
 import edu.internet2.middleware.shibboleth.idp.authn.Saml2LoginContext;
@@ -53,7 +54,7 @@ public class MCBLoginHandler extends AbstractLoginHandler {
 
     /** Class logger. */
     private final Logger log = LoggerFactory.getLogger(MCBLoginHandler.class);
-    private final String version = "MCB Login Handler -- Version 1.0.0 (2014-01-05)";
+    private final String version = "MCB Login Handler -- Version 1.0.1 (2014-04-11)";
 
     /** The URL of the servlet used to perform authentication. */
     private String authenticationServletURL;
@@ -90,12 +91,12 @@ public class MCBLoginHandler extends AbstractLoginHandler {
 		log.debug("MCBConfiguration bean = [{}]", mcbConfiguration);
 
     	ServletContext application = null;
-    	Saml2LoginContext loginContext = null;
+    	LoginContext loginContext = null;
     	EntityDescriptor entityDescriptor = null;
     	String entityID = "(unknown)";
 
    		application = httpRequest.getSession().getServletContext();
-		loginContext = (Saml2LoginContext)HttpServletHelper.getLoginContext(HttpServletHelper.getStorageService(application),
+		loginContext = (LoginContext)HttpServletHelper.getLoginContext(HttpServletHelper.getStorageService(application),
 				application, httpRequest);
 		
 		entityDescriptor = HttpServletHelper.getRelyingPartyMetadata(loginContext.getRelyingPartyId(),
