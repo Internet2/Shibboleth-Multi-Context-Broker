@@ -310,7 +310,11 @@ public class JAASLoginSubmodule implements MCBSubmodule {
                     ncb.setName(uname);
                 } else if (cb instanceof PasswordCallback) {
                     PasswordCallback pcb = (PasswordCallback) cb;
-                    pcb.setPassword(pass.toCharArray());
+                    if (pass != null) {
+                    	pcb.setPassword(pass.toCharArray());
+                    } else {
+                    	pcb.setPassword(null);
+                    }
                 }
             }
         }
