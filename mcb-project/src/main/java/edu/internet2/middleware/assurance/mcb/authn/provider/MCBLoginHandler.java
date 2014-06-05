@@ -124,6 +124,20 @@ public class MCBLoginHandler extends AbstractLoginHandler {
     			log.debug("Service provider requested forced authentication. Skipping previous session handling.");
     	        HttpSession userSession = httpRequest.getSession();
     	        userSession.setAttribute(MCBLoginServlet.FORCE_REAUTH, Boolean.TRUE);
+		    	// from the session, we can get the Subject
+		    	Subject subj = idpSession.getSubject();
+		    	// now we get the list of principals for this subject/session
+		    	Set<Principal> ps =  subj.getPrincipals();
+		    	log.debug("principals size = {}", ps.size());
+		    	MCBUsernamePrincipal principal = null;
+		    	// the set for us should only be one principal, look for the first one
+		    	for (Principal p : ps) {
+		    		log.debug("principal type is [{}]", p.getClass().toString());
+		    		if (p instanceof MCBUsernamePrincipal) {
+		    			principal = (MCBUsernamePrincipal) p;
+		    		}
+		    	}
+        		userSession.setAttribute(LoginHandler.PRINCIPAL_KEY, principal); // store it with the request
     		} else {
 		    	// from the session, we can get the Subject
 		    	Subject subj = idpSession.getSubject();
