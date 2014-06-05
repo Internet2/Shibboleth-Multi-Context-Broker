@@ -54,7 +54,8 @@ public class MCBLoginHandler extends AbstractLoginHandler {
 
     /** Class logger. */
     private final Logger log = LoggerFactory.getLogger(MCBLoginHandler.class);
-    private final String version = "MCB Login Handler -- Version 1.0.1 (2014-04-11)";
+//    private final String version = "MCB Login Handler -- Version 1.0.1 (2014-04-11)";
+	public static final String VERSION =  MCBLoginServlet.class.getPackage().getImplementationVersion(); //"1.1.2 (2014-04-11)";
 
     /** The URL of the servlet used to perform authentication. */
     private String authenticationServletURL;
@@ -80,7 +81,7 @@ public class MCBLoginHandler extends AbstractLoginHandler {
         String endofline = System.getProperty("line.separator");
         log.info(endofline + "=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=" + endofline + endofline);
         
-        log.info(version);
+        log.info("MCBLoginHandler -- " + VERSION);
 		
 		log.debug("MCBConfiguration bean = [{}]", mcbConfiguration);
     }
