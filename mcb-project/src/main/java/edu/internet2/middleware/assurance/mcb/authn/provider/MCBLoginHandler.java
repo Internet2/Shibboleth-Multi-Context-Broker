@@ -54,7 +54,8 @@ public class MCBLoginHandler extends AbstractLoginHandler {
 
     /** Class logger. */
     private final Logger log = LoggerFactory.getLogger(MCBLoginHandler.class);
-    private final String version = "MCB Login Handler -- Version 1.0.1 (2014-04-11)";
+//    private final String version = "MCB Login Handler -- Version 1.0.1 (2014-04-11)";
+	public static final String VERSION =  MCBLoginServlet.class.getPackage().getImplementationVersion(); //"1.1.2 (2014-04-11)";
 
     /** The URL of the servlet used to perform authentication. */
     private String authenticationServletURL;
@@ -80,7 +81,7 @@ public class MCBLoginHandler extends AbstractLoginHandler {
         String endofline = System.getProperty("line.separator");
         log.info(endofline + "=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=" + endofline + endofline);
         
-        log.info(version);
+        log.info("MCBLoginHandler -- " + VERSION);
 		
 		log.debug("MCBConfiguration bean = [{}]", mcbConfiguration);
     }
@@ -124,6 +125,20 @@ public class MCBLoginHandler extends AbstractLoginHandler {
     			log.debug("Service provider requested forced authentication. Skipping previous session handling.");
     	        HttpSession userSession = httpRequest.getSession();
     	        userSession.setAttribute(MCBLoginServlet.FORCE_REAUTH, Boolean.TRUE);
+		    	// from the session, we can get the Subject
+		    	Subject subj = idpSession.getSubject();
+		    	// now we get the list of principals for this subject/session
+		    	Set<Principal> ps =  subj.getPrincipals();
+		    	log.debug("principals size = {}", ps.size());
+		    	MCBUsernamePrincipal principal = null;
+		    	// the set for us should only be one principal, look for the first one
+		    	for (Principal p : ps) {
+		    		log.debug("principal type is [{}]", p.getClass().toString());
+		    		if (p instanceof MCBUsernamePrincipal) {
+		    			principal = (MCBUsernamePrincipal) p;
+		    		}
+		    	}
+        		userSession.setAttribute(LoginHandler.PRINCIPAL_KEY, principal); // store it with the request
     		} else {
 		    	// from the session, we can get the Subject
 		    	Subject subj = idpSession.getSubject();

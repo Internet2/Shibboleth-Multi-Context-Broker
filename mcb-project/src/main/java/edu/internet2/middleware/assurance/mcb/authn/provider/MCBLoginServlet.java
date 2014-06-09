@@ -58,7 +58,7 @@ import edu.internet2.middleware.shibboleth.idp.util.HttpServletHelper;
  */
 public class MCBLoginServlet extends HttpServlet {
 
-	public static final String VERSION = "1.1.2 (2014-04-11)";
+	public static final String VERSION =  MCBLoginServlet.class.getPackage().getImplementationVersion(); //"1.1.2 (2014-04-11)";
 	/**
 	 * Serial UID 
 	 */
@@ -560,11 +560,15 @@ public class MCBLoginServlet extends HttpServlet {
 			log.debug("Relying party did not request a context, using potential context list for the user.");
 			for (String contextName: potentialContexts) {
 				log.trace("Looking up method for context name = [{}]", contextName);
-				String methodName = mcbConfig.getContextMap().get(contextName).getMethod().trim();
-				String methodLabel = mcbConfig.getMethodMap().get(methodName).getContent().trim();
-				Method method = mcbConfig.getMethodMap().get(methodName);
-				allMethods.add(method);
-				log.trace("Adding method [{}]", methodLabel);
+				try {
+					String methodName = mcbConfig.getContextMap().get(contextName).getMethod().trim();
+					String methodLabel = mcbConfig.getMethodMap().get(methodName).getContent().trim();
+					Method method = mcbConfig.getMethodMap().get(methodName);
+					allMethods.add(method);
+					log.trace("Adding method [{}]", methodLabel);
+				} catch (NullPointerException npe) {
+					log.warn("Method for requested context [{}] NOT found in configuration.", contextName);
+				}
 			}
 		}
 		

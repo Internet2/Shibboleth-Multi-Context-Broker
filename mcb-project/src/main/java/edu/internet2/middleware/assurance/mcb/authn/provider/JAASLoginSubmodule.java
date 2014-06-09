@@ -205,7 +205,14 @@ public class JAASLoginSubmodule implements MCBSubmodule {
 		this.loginPage = loginPage;
 		this.useJsp = useJsp;
 		
+		if (this.useJsp == true) {
+			// make sure jsp page is qualified with a leading slash
+			if (loginPage.startsWith("/") == false) {
+				this.loginPage = "/" + loginPage;
+			}
+		}
 		log.debug("Processing login page as JSP is [{}]", this.useJsp);
+		log.debug("Login page is [{}]", this.loginPage);
 		log.debug("Setting JAAS configuration file to [{}]", this.jaasConfigFile);
 		System.setProperty("java.security.auth.login.config", this.jaasConfigFile);
 	}
