@@ -105,6 +105,7 @@ public class MCBLoginHandler extends AbstractLoginHandler {
 		entityID = entityDescriptor.getEntityID();
 		log.debug("Relying party = [{}]", entityID);
 		List<String> requestedContexts = loginContext.getRequestedAuthenticationMethods();
+		// TODO figure out what action to take if we have requested values and a default configuration value
 		// we must remove the "unspecified" context, it has no meaning as a requested context
 		if (requestedContexts != null) {
 			for (String ctx: requestedContexts) {
@@ -113,6 +114,11 @@ public class MCBLoginHandler extends AbstractLoginHandler {
 					requestedContexts.remove(ctx);
 				}
 			}
+		} else if (loginContext.getDefaultAuthenticationMethod() != null) {
+			// use the default method defined in Shib configuration
+			requestedContexts = new ArrayList<String>();
+			requestedContexts.add(loginContext.getDefaultAuthenticationMethod());
+			log.debug("SP did not send requested context value. Adding default of [{}]", loginContext.getDefaultAuthenticationMethod());
 		}
 		
     	// look for a previous session first
@@ -138,6 +144,13 @@ public class MCBLoginHandler extends AbstractLoginHandler {
 		    			principal = (MCBUsernamePrincipal) p;
 		    		}
 		    	}
+		    	// if we get a forceAuthn, by design we will reset the session entirely to
+		    	// no satisfying contexts, so we retain the principal but no information about them
+		    	principal.getCurrentContexts().clear();
+		    	principal.getPotentialContexts().clear();
+		    	principal.setFailedCount(0);
+		    	// save the original principal name, we don't allow it to change (typically)
+		    	userSession.setAttribute(MCBLoginServlet.ORIGINAL_PRINCIPAL_NAME, principal.getName());
         		userSession.setAttribute(LoginHandler.PRINCIPAL_KEY, principal); // store it with the request
     		} else {
 		    	// from the session, we can get the Subject
@@ -176,6 +189,8 @@ public class MCBLoginHandler extends AbstractLoginHandler {
 						AuthenticationEngine.returnToAuthenticationEngine(httpRequest, httpResponse);
 						return;
 					}
+			    	// save the original principal name, we don't allow it to change (typically)
+					httpRequest.getSession().setAttribute(MCBLoginServlet.ORIGINAL_PRINCIPAL_NAME, principal.getName());
 					// set the upgrade auth key in the session
 					httpRequest.getSession().setAttribute(MCBLoginServlet.UPGRADE_AUTH, Boolean.TRUE);
 		    	}

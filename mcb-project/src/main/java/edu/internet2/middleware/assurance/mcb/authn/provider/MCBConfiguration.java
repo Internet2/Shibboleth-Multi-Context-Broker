@@ -34,6 +34,7 @@ import javax.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.internet2.middleware.assurance.mcb.config.AllowPrincipalSwitchingEnumType;
 import edu.internet2.middleware.assurance.mcb.config.AllowedContexts;
 import edu.internet2.middleware.assurance.mcb.config.AuthMethods;
 import edu.internet2.middleware.assurance.mcb.config.Context;
@@ -131,6 +132,13 @@ public class MCBConfiguration {
 	// RP requires a context, we always enforce the principal having one.
 	private boolean principalAuthnContextRequired = true;
 	
+	public enum AllowPrincipalSwitching {
+		NONE,
+		CASE_ONLY,
+		ANY
+	}
+	private AllowPrincipalSwitching allowPrincipalSwitching = null;
+	
 	
 	public MCBConfiguration(String configurationFile, Collection<MCBSubmodule> beans) throws Exception {
 
@@ -172,6 +180,20 @@ public class MCBConfiguration {
 	        
 	        setPrincipalAuthnContextRequired(mcb.isPrincipalAuthnContextRequired());
 	        log.info("MCB principalAuthnContextRequired = [{}]", isPrincipalAuthnContextRequired());
+	        
+	        if (mcb.getAllowPrincipalSwitching() != null) {
+	        	if (mcb.getAllowPrincipalSwitching() == AllowPrincipalSwitchingEnumType.ANY) {
+	        		setAllowPrincipalSwitching(AllowPrincipalSwitching.ANY);
+	        	} else if (mcb.getAllowPrincipalSwitching() == AllowPrincipalSwitchingEnumType.CASE_ONLY) {
+	        		setAllowPrincipalSwitching(AllowPrincipalSwitching.CASE_ONLY);
+	        	} else if (mcb.getAllowPrincipalSwitching() == AllowPrincipalSwitchingEnumType.NONE) {
+	        		setAllowPrincipalSwitching(AllowPrincipalSwitching.NONE);
+	        	}
+	        	log.info("Allow principal switching set to [{}]", allowPrincipalSwitching);
+	        } else {
+	        	setAllowPrincipalSwitching(AllowPrincipalSwitching.CASE_ONLY);
+	        	log.warn("Allow principal switching set to default value [{}]", allowPrincipalSwitching);
+	        }
 	        
 	        maxFailures = mcb.getMaxFailures();
 	        log.info("MCB setting max failures to [{}]", maxFailures);
@@ -729,6 +751,14 @@ public class MCBConfiguration {
 	public void setPrincipalAuthnContextRequired(
 			boolean principalAuthnContextRequired) {
 		this.principalAuthnContextRequired = principalAuthnContextRequired;
+	}
+
+	public AllowPrincipalSwitching getAllowPrincipalSwitching() {
+		return allowPrincipalSwitching;
+	}
+
+	public void setAllowPrincipalSwitching(AllowPrincipalSwitching allowPrincipalSwitching) {
+		this.allowPrincipalSwitching = allowPrincipalSwitching;
 	}
 
 }

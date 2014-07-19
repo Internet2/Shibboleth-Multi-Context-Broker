@@ -84,6 +84,8 @@ public class MCBLoginServlet extends HttpServlet {
     public static final String UPGRADE_AUTH = "upgradeAuth";
     // Parameter name for re-authenticating the user
     public static final String FORCE_REAUTH = "forceReAuth";
+    // Parameter name for the original principal name
+    public static final String ORIGINAL_PRINCIPAL_NAME = "originalPrincipalName";
     
     /** {@inheritDoc} */
     public void init(ServletConfig config) throws ServletException {
@@ -196,7 +198,7 @@ public class MCBLoginServlet extends HttpServlet {
         HttpSession userSession = request.getSession();
 		List<String> requestedContexts = getRequestedContexts(request);
 		String methodUsed;
-		String contextUsed;
+//		String contextUsed;
 		MCBSubmodule sub;
 
 		try {
@@ -210,6 +212,34 @@ public class MCBLoginServlet extends HttpServlet {
 			log.debug("submodule process login returned [{}]", b);
 			principal = (MCBUsernamePrincipal) userSession.getAttribute(LoginHandler.PRINCIPAL_KEY);
 			if (b == true) {
+				// check for the principal switching
+				String originalPrincipalName = (String) userSession.getAttribute(ORIGINAL_PRINCIPAL_NAME);
+				// if we have an original principal name and if we are not configured to allow switching
+				if ((originalPrincipalName != null) && (mcbConfig.getAllowPrincipalSwitching() != MCBConfiguration.AllowPrincipalSwitching.ANY)) {
+					// do the check
+					boolean switched = false;
+					if ((mcbConfig.getAllowPrincipalSwitching() != MCBConfiguration.AllowPrincipalSwitching.CASE_ONLY) && 
+							(principal.getName().equalsIgnoreCase(originalPrincipalName) == false)) {
+						// principal's changed by more than case, fail
+						switched = true;
+					} else if (principal.getName().equals(originalPrincipalName) == false) {
+						// principal's name changed in some way, fail
+						switched = true;
+					}
+					if (switched == true) {
+						log.warn("Failing authentication attempt due to principal name changing. Original = [{}]. New = [{}]", originalPrincipalName, principal.getName());
+		    			AuthenticationException ae = new AuthenticationException("New principal name does not match prior session principal name.");
+		            	request.setAttribute(LoginHandler.AUTHENTICATION_EXCEPTION_KEY, ae);
+		            	request.removeAttribute(LoginHandler.PRINCIPAL_KEY); // remove the principal
+		            	request.removeAttribute(ORIGINAL_PRINCIPAL_NAME);    // remove the original name
+		            	// we effectively kill any session with this browser
+		            	// send them back with a SAML error
+		                AuthenticationEngine.returnToAuthenticationEngine(request, response);
+		                return true;
+					}
+				}
+				
+				
 				// perform attribute resolution now
 				MCBAttributeResolver ar = new MCBAttributeResolver();
 				log.debug("Running attribute resolution for principal [{}]", principal.getName());
