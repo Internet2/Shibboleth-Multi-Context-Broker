@@ -8,6 +8,7 @@
                 <xs:element ref="idms" />
                 <xs:element ref="maxFailures" />
                 <xs:element ref="principalAuthnContextRequired" />
+                <xs:element ref="allowPrincipalSwitching" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="authnContexts" />
                 <xs:element ref="authMethods" />
             </xs:all>
@@ -30,7 +31,18 @@
         </xs:complexType>
     </xs:element>
     <xs:element name="principalAuthnContextRequired" type="xs:boolean" />
+    
     <xs:element name="maxFailures" type="xs:int" />
+    <!-- Choices available for principal switching -->
+    <xs:simpleType name="allowPrincipalSwitchingEnumType">
+        <xs:restriction base="xs:normalizedString">
+            <xs:enumeration value="None"/>
+            <xs:enumeration value="CaseOnly"/>
+            <xs:enumeration value="Any"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:element name="allowPrincipalSwitching" type="allowPrincipalSwitchingEnumType" />
+    
     <xs:element name="authnContexts">
         <xs:complexType>
             <xs:sequence>
