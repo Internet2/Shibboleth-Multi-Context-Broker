@@ -8,19 +8,24 @@
     
               <form id="login" action="$actionUrl" method="post">
 
-              #if ($upgradeAuth == "true")
-              <h4>You must upgrade your authentication</h4>
-              #end
-              #if ($forceReAuth == "true")
-              <h4>You must re-authenticate per relying party request.</h4>
-              #end
               <h3>
                 Log in with method
               </h3>
 
+              #if ($upgradeAuth == "true")
+              <h4>You must upgrade your authentication</h4>
+              #end
+    #if ($forceReAuth == "true")
+        <h4>You must re-authenticate per relying party request.</h4>
+    #end
+
               <select id="selectedmethod" name="selectedmethod" size="5">
               #foreach ($method in $methodList)
-                <option value="$method.getName()">$method.getContent()</option>
+                #if ($method.isSatisfied() == true)
+                    <option value="$method.getName()">$method.getContent() (Already Satisfied)</option>
+                #else
+                    <option value="$method.getName()">$method.getContent()</option>
+                #end
               #end
               </select>
                 <p />

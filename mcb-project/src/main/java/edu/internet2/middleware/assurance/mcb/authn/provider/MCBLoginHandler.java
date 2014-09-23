@@ -171,25 +171,67 @@ public class MCBLoginHandler extends AbstractLoginHandler {
 		    		httpRequest.setAttribute(LoginHandler.PRINCIPAL_KEY, principal);
 		    		log.debug("{}", principal.toString(true));
 		    	
-		    		// Validate the existing context list for the user against the requested
-					// Does the used context list match the requested context list?
-					ArrayList<String> validContexts = mcbConfiguration.getSatisfyingContexts(requestedContexts);
-					boolean valid = mcbConfiguration.isValid(principal.getCurrentContexts(), validContexts);
-					log.debug("Used context listed in requested contexts = [{}]", valid);
-					if ((valid == true) || (requestedContexts.size() == 0)) {
-						log.debug("Simple case met. The used context is in the requested list for principal [{}]", principal.getName());
-						// we must figure out if the user actually used a requested context or one that satisfied it by configuration
-						if (requestedContexts.size() == 0) {
-							httpRequest.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, principal.getCurrentContexts().get(0));
-						} else {
-							// they used an upgraded one, we must send back the proper matching requested value, not what we used
-							httpRequest.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, requestedContexts.get(0));
-						}
+		    		// 3 cases possible
+		    		// Case 1) No requested contexts. Send back the current context.
+		    		// Case 2) 1 requested context. If matched to a used context, send that back.
+		    		// Case 3) 2 or more requested contexts. Must match in an ordered list fashion.
+		    		
+		    		if (requestedContexts.size() == 0) {
+		    			// SP did not request a context, very simple case met, send what we have
+						log.debug("Very simple case met. SP did not request a context for principal [{}]", principal.getName());
+						httpRequest.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, principal.getCurrentContexts().get(0));
 						httpRequest.setAttribute(LoginHandler.PRINCIPAL_KEY, principal);
 						AuthenticationEngine.returnToAuthenticationEngine(httpRequest, httpResponse);
 						return;
-					}
-			    	// save the original principal name, we don't allow it to change (typically)
+		    		}
+
+		    		// Get the valid satisfied contexts based on the request
+					ArrayList<String> validContexts = mcbConfiguration.getSatisfyingContexts(requestedContexts);
+					boolean valid = mcbConfiguration.isValid(principal.getCurrentContexts(), validContexts);
+					log.debug("Used context listed in requested contexts = [{}]", valid);
+
+		    		if (requestedContexts.size() == 1) {
+		    			// SP only requested 1, see if we match it
+						log.debug("Simple case met. The used context is in the requested list for principal [{}]", principal.getName());
+						httpRequest.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, requestedContexts.get(0));
+						httpRequest.setAttribute(LoginHandler.PRINCIPAL_KEY, principal);
+						AuthenticationEngine.returnToAuthenticationEngine(httpRequest, httpResponse);
+						return;
+		    		}
+		    		
+		    		// Finally the complex case, we may satisfy the request or we may need to do more
+		    		ArrayList<String> matchedContexts = new ArrayList<String>();
+		    		ArrayList<String> missingContexts = new ArrayList<String>();
+		    		for (String context: requestedContexts) {
+		    			// check the contexts in the order given
+		    			ArrayList<String> clist = new ArrayList<String>();
+		    			clist.add(context);
+		    			valid = mcbConfiguration.isValid(principal.getCurrentContexts(), clist);
+		    			if (valid == true) {
+		    				// we found a match
+		    				log.debug("Adding context [{}] to matched list.", context);
+		    				matchedContexts.add(context);
+		    				break; // once we find a match, we can stop
+		    			} else {
+		    				log.debug("Adding context [{}} to the missing list", context);
+		    				missingContexts.add(context);
+		    			}
+		    		}
+		    		// so now we have a missing and matched list
+		    		// if missing is empty and matched has a match, we are done
+		    		if ((missingContexts.size() == 0) && (matchedContexts.size() > 0)) {
+		    			// use the highest context value matched
+						log.debug("Multiple context case met. A used context [{}] is in the requested list for principal [{}]", matchedContexts.get(matchedContexts.size()-1), principal.getName());
+						httpRequest.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, matchedContexts.get(matchedContexts.size()-1));
+						httpRequest.setAttribute(LoginHandler.PRINCIPAL_KEY, principal);
+						AuthenticationEngine.returnToAuthenticationEngine(httpRequest, httpResponse);
+						return;
+		    		}
+		    		
+		    		// at this point we must ask for upgraded authentication for the user, either 
+		    		// nothing matched or the preferred context was missing from the user's list
+
+		    		// save the original principal name, we don't allow it to change (typically)
 					httpRequest.getSession().setAttribute(MCBLoginServlet.ORIGINAL_PRINCIPAL_NAME, principal.getName());
 					// set the upgrade auth key in the session
 					httpRequest.getSession().setAttribute(MCBLoginServlet.UPGRADE_AUTH, Boolean.TRUE);

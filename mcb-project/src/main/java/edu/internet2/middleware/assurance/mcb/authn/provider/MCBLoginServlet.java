@@ -32,6 +32,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.joda.time.DateTime;
 import org.opensaml.saml2.core.AuthnContext;
 import org.opensaml.saml2.core.StatusCode;
 import org.opensaml.saml2.metadata.EntityDescriptor;
@@ -84,6 +85,8 @@ public class MCBLoginServlet extends HttpServlet {
     public static final String UPGRADE_AUTH = "upgradeAuth";
     // Parameter name for re-authenticating the user
     public static final String FORCE_REAUTH = "forceReAuth";
+    // Parameter name for bypassing reauth if user selects satisfied method
+    public static final String BYPASS_SATISFIED_METHODS = "bypassSatisfiedMethods";
     // Parameter name for the original principal name
     public static final String ORIGINAL_PRINCIPAL_NAME = "originalPrincipalName";
     
@@ -113,6 +116,7 @@ public class MCBLoginServlet extends HttpServlet {
     	MCBUsernamePrincipal principal = null;
         HttpSession userSession = request.getSession();
 
+        log.trace("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+");
     	log.debug("Request received from [{}]", request.getRemoteAddr());
     	// either find or create the principal object we will use for this user
     	principal = (MCBUsernamePrincipal) userSession.getAttribute(LoginHandler.PRINCIPAL_KEY);
@@ -281,6 +285,7 @@ public class MCBLoginServlet extends HttpServlet {
 					principal.setCurrentContexts(usedContextList); // save the context values used
 					request.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, usedContextList.get(0));
 					request.setAttribute(LoginHandler.PRINCIPAL_KEY, principal);
+					request.setAttribute(LoginHandler.AUTHENTICATION_INSTANT_KEY, new DateTime());
 					AuthenticationEngine.returnToAuthenticationEngine(request, response);
 					return true;
 				}
@@ -316,6 +321,7 @@ public class MCBLoginServlet extends HttpServlet {
 						request.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, ctx);
 					}
 					request.setAttribute(LoginHandler.PRINCIPAL_KEY, principal);
+					request.setAttribute(LoginHandler.AUTHENTICATION_INSTANT_KEY, new DateTime());
 					AuthenticationEngine.returnToAuthenticationEngine(request, response);
 					return true;
 				}
@@ -400,6 +406,36 @@ public class MCBLoginServlet extends HttpServlet {
 		
 		if (pickedMethod == true) {
     		try {
+				// if this is an upgrade authentication, but not a forced authentication and the user
+				// has selected a previously used method, then just pass them through with that information
+				Boolean bypassSatisfiedMethods = (Boolean) userSession.getAttribute(BYPASS_SATISFIED_METHODS);
+				if (bypassSatisfiedMethods == null) bypassSatisfiedMethods = Boolean.FALSE;
+				userSession.removeAttribute(BYPASS_SATISFIED_METHODS);
+				log.debug("Bypass satisfied methods = [{}]", bypassSatisfiedMethods);
+				if (bypassSatisfiedMethods.booleanValue() == true) {
+					// see if the user chose a method they have already used, if so, bypass authentication
+					MCBUsernamePrincipal principal = (MCBUsernamePrincipal) userSession.getAttribute(MCBLoginHandler.PRINCIPAL_KEY);
+					Method method = mcbConfig.getMethodMap().get(selectedMethodName);
+					for (String used: principal.getCurrentContexts()) {
+						log.debug("Used context = [{}] -- Selected method = [{}]", used, method.getName());
+						ArrayList<String> contextList = mcbConfig.getContextFromMethod(selectedMethodName);
+						for (String context: contextList) {
+							if (used.equals(context) == true) {
+								// winner, winner, chicken dinner
+								log.debug("User selected prior method, bypassing re-authentication and using context [{}}", used);
+				    			userSession.removeAttribute(MCBLoginServlet.FORCE_REAUTH);
+				    			userSession.removeAttribute(MCBLoginServlet.UPGRADE_AUTH);
+	
+								request.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, used);
+								request.setAttribute(LoginHandler.PRINCIPAL_KEY, principal);
+								AuthenticationEngine.returnToAuthenticationEngine(request, response);
+								return true;
+							}
+						}
+					}
+				}
+			
+			
 				// The user has selected a valid method/context, so next we must ask that method
 				// to display a login form for the user
 				Method method = mcbConfig.getMethodMap().get(selectedMethodName);
@@ -571,7 +607,12 @@ public class MCBLoginServlet extends HttpServlet {
     protected void showMethods(HttpServletRequest request, HttpServletResponse response, 
     		List<String> potentialContexts, List<String> requestedContexts) {
         HttpSession userSession = request.getSession();
-
+    	MCBUsernamePrincipal principal = (MCBUsernamePrincipal) userSession.getAttribute(LoginHandler.PRINCIPAL_KEY);
+    	// if force authentication is requested, always show all choices
+    	Boolean forceAuth =  (Boolean) userSession.getAttribute(FORCE_REAUTH);
+    	if (forceAuth == null) forceAuth = Boolean.FALSE;
+    	log.debug("Force reauth = [{}}", forceAuth);
+    	
         // get the total list of contexts that can satisfy
         ArrayList<String> allowableContexts = mcbConfig.getSatisfyingContexts(potentialContexts, requestedContexts);
         log.debug("Found [{}] allowable contexts to choose from.", allowableContexts.size());
@@ -581,8 +622,23 @@ public class MCBLoginServlet extends HttpServlet {
 			String methodName = mcbConfig.getContextMap().get(contextName).getMethod().trim();
 			String methodLabel = mcbConfig.getMethodMap().get(methodName).getContent().trim();
 			Method method = mcbConfig.getMethodMap().get(methodName);
-			allMethods.add(method);
-			log.trace("Adding method [{}]", methodLabel);
+			method.setSatisfied(false); // initially false
+			for (String used: principal.getCurrentContexts()) {
+				if (contextName.equals(used) == true) {
+					method.setSatisfied(true); // override to true
+					log.debug("Found previously satisfied context of [{}]", contextName);
+				}
+			}
+			// if configuration says to show all or force authentication is requested, always show the values
+			if ((mcbConfig.isShowSatisfiedContexts() == true) || (forceAuth.booleanValue() == true)) {
+				allMethods.add(method);
+				log.trace("Adding method [{}]", methodLabel);
+			} else if (method.isSatisfied() == false) {
+				allMethods.add(method);
+				log.trace("Adding method [{}]", methodLabel);
+			} else {
+				log.debug("Skipping method [{}] due to excluding already satisfied context values.", methodLabel);
+			}
 		}
 
 		if (requestedContexts.size() == 0) {
@@ -650,21 +706,26 @@ public class MCBLoginServlet extends HttpServlet {
     		userSession.setAttribute(METHOD_LIST_PARAM_NAME, allMethods);
 			// note that this is an upgrade authentication request
 			Boolean upgradeAuth = (Boolean) userSession.getAttribute(UPGRADE_AUTH);
+			if (upgradeAuth == null) upgradeAuth = Boolean.FALSE;
 			userSession.removeAttribute(UPGRADE_AUTH);
-			if ((upgradeAuth != null) && (upgradeAuth.booleanValue() == true)) {
+			if (upgradeAuth.booleanValue() == true) {
 				vCtx.put("upgradeAuth","true");
 			} else {
 				vCtx.put("upgradeAuth","");
 			}
 			// note that this is an force re-authentication request
-			Boolean forceAuth = (Boolean) userSession.getAttribute(FORCE_REAUTH);
+//			Boolean forceAuth = (Boolean) userSession.getAttribute(FORCE_REAUTH);
 			userSession.removeAttribute(FORCE_REAUTH);
-			if ((forceAuth != null) && (forceAuth.booleanValue() == true)) {
+			if (forceAuth.booleanValue() == true) {
 				vCtx.put("forceAuth","true");
 			} else {
 				vCtx.put("forceAuth","");
 			}
 
+			if ((upgradeAuth.booleanValue() == true) && (forceAuth.booleanValue() == false)) {
+				log.debug("Setting bypass satisfied to true.");
+				userSession.setAttribute(BYPASS_SATISFIED_METHODS, new Boolean(Boolean.TRUE));
+			}
 			doVelocity(request, response, "selectcontext.vm", vCtx);
 		} catch (AuthenticationException ae) {
 			log.error("", ae);

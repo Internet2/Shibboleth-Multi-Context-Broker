@@ -29,6 +29,11 @@
      -->
     <principalAuthnContextRequired>true</principalAuthnContextRequired>
     
+    <!--
+        Show satisfied contexts for upgrade authentications. Defaults to false if not defined.
+    -->
+    <showSatisfiedContexts>false</showSatisfiedContexts>
+    
     <!-- 
         The maximum number of failures allowed a user before returning a SAML failure to the
         relying party. Must be specified according to schema definition. Set to a value of -1

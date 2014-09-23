@@ -8,6 +8,7 @@
                 <xs:element ref="idms" />
                 <xs:element ref="maxFailures" />
                 <xs:element ref="principalAuthnContextRequired" />
+                <xs:element ref="showSatisfiedContexts" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="allowPrincipalSwitching" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="authnContexts" />
                 <xs:element ref="authMethods" />
@@ -31,6 +32,7 @@
         </xs:complexType>
     </xs:element>
     <xs:element name="principalAuthnContextRequired" type="xs:boolean" />
+    <xs:element name="showSatisfiedContexts" type="xs:boolean" />
     
     <xs:element name="maxFailures" type="xs:int" />
     <!-- Choices available for principal switching -->
@@ -61,6 +63,7 @@
         <xs:complexType mixed="true">
             <xs:attribute name="name" use="required" type="xs:NCName" />
             <xs:attribute name="bean" use="required" />
+            <xs:attribute name="satisfied" use="optional" type="xs:boolean" />
         </xs:complexType>
     </xs:element>
     <xs:element name="context">

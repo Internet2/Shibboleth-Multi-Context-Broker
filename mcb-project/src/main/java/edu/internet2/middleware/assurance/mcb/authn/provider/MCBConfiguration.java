@@ -121,6 +121,8 @@ public class MCBConfiguration {
     
 	// show only auth methods that match the requested (if any match)
 	private boolean showOnlyRequested = false;
+	// show satisfied contexts when upgrade authentication is needed
+	private boolean showSatisfiedContexts = false;
 	// How many failures are allowed before sending a SAML failure back to the RP
 	private int maxFailures = -1;
 	// The velocity properties file
@@ -180,6 +182,12 @@ public class MCBConfiguration {
 	        
 	        setPrincipalAuthnContextRequired(mcb.isPrincipalAuthnContextRequired());
 	        log.info("MCB principalAuthnContextRequired = [{}]", isPrincipalAuthnContextRequired());
+	        
+	        if (mcb.isShowSatisfiedContexts() != null) {
+	        	setShowSatisfiedContexts(mcb.isShowSatisfiedContexts());
+	        }
+	        log.info("MCB showSatisifiedContexts = [{}]", isShowSatisfiedContexts());
+	        
 	        
 	        if (mcb.getAllowPrincipalSwitching() != null) {
 	        	if (mcb.getAllowPrincipalSwitching() == AllowPrincipalSwitchingEnumType.ANY) {
@@ -759,6 +767,14 @@ public class MCBConfiguration {
 
 	public void setAllowPrincipalSwitching(AllowPrincipalSwitching allowPrincipalSwitching) {
 		this.allowPrincipalSwitching = allowPrincipalSwitching;
+	}
+
+	public boolean isShowSatisfiedContexts() {
+		return showSatisfiedContexts;
+	}
+
+	public void setShowSatisfiedContexts(boolean showSatisfiedContexts) {
+		this.showSatisfiedContexts = showSatisfiedContexts;
 	}
 
 }
