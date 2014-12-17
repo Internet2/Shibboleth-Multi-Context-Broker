@@ -611,7 +611,7 @@ public class MCBLoginServlet extends HttpServlet {
     	// if force authentication is requested, always show all choices
     	Boolean forceAuth =  (Boolean) userSession.getAttribute(FORCE_REAUTH);
     	if (forceAuth == null) forceAuth = Boolean.FALSE;
-    	log.debug("Force reauth = [{}}", forceAuth);
+    	log.debug("Force reauth = [{}]", forceAuth);
     	
         // get the total list of contexts that can satisfy
         ArrayList<String> allowableContexts = mcbConfig.getSatisfyingContexts(potentialContexts, requestedContexts);
