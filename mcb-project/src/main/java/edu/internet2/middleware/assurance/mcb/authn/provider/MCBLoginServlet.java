@@ -127,14 +127,21 @@ public class MCBLoginServlet extends HttpServlet {
     	}
     	log.debug("principal = [{}]", principal);
     	
-		application = this.getServletContext();
-		loginContext = (LoginContext)HttpServletHelper.getLoginContext(HttpServletHelper.getStorageService(application),
-				application, request);
-		entityDescriptor = HttpServletHelper.getRelyingPartyMetadata(loginContext.getRelyingPartyId(),
-				HttpServletHelper.getRelyingPartyConfigurationManager(application));
-		entityID = entityDescriptor.getEntityID();
-		log.debug("Relying party = [{}]", entityID);
-
+    	try {
+			application = this.getServletContext();
+			loginContext = (LoginContext)HttpServletHelper.getLoginContext(HttpServletHelper.getStorageService(application),
+					application, request);
+			entityDescriptor = HttpServletHelper.getRelyingPartyMetadata(loginContext.getRelyingPartyId(),
+					HttpServletHelper.getRelyingPartyConfigurationManager(application));
+			entityID = entityDescriptor.getEntityID();
+			log.debug("Relying party = [{}]", entityID);
+    	} catch (Exception e) {
+    		log.error("Unable to determine Relying Party. Probable bookmark access to servlet.");
+			request.setAttribute(LoginHandler.AUTHENTICATION_ERROR_KEY, StatusCode.REQUEST_UNSUPPORTED_URI);
+			AuthenticationEngine.returnToAuthenticationEngine(request, response);
+    		return;
+    	}
+    	
 		// Check and see if there is an existing session we are upgrading
 		Boolean doUpgrade =  (Boolean) userSession.getAttribute(UPGRADE_AUTH);
 		if ((doUpgrade != null) && (doUpgrade.booleanValue() == true)) {
@@ -349,7 +356,8 @@ public class MCBLoginServlet extends HttpServlet {
 			// if we get here then the login failed, we must count it and let the submodule handle the user retrying the login
 			principal.setFailedCount( principal.getFailedCount() + 1 );
 			log.debug("Current failed login count = [{}]", principal.getFailedCount());
-			if (principal.getFailedCount() >= mcbConfig.getMaxFailures()) {
+			// only stop if we exceed the max failures and max failures is actually set
+			if ((mcbConfig.getMaxFailures() != -1) && (principal.getFailedCount() >= mcbConfig.getMaxFailures())) {
 				// reached the limit so generate an error
     			AuthenticationException ae = new AuthenticationException("Maximum login attempts reached.");
             	request.setAttribute(LoginHandler.AUTHENTICATION_EXCEPTION_KEY, ae);
