@@ -190,7 +190,9 @@ public class MCBLoginHandler extends AbstractLoginHandler {
 					boolean valid = mcbConfiguration.isValid(principal.getCurrentContexts(), validContexts);
 					log.debug("Used context listed in requested contexts = [{}]", valid);
 
-		    		if (requestedContexts.size() == 1) {
+					// if we matched an already used context and only one is in the list, just 
+					// match and send that one back to the SP
+		    		if ((requestedContexts.size() == 1) && (valid == true)) {
 		    			// SP only requested 1, see if we match it
 						log.debug("Simple case met. The used context is in the requested list for principal [{}]", principal.getName());
 						httpRequest.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, requestedContexts.get(0));
