@@ -378,6 +378,38 @@ public class MCBConfiguration {
 	}
 
 	/**
+	 * Validate that the used context is the highest in the list
+	 * @param used
+	 * @param container
+	 * @return
+	 */
+	public boolean isValidAndHigher(List<String> used, List<String> container) {
+		if (container == null) return false;
+		if (container.size() == 0) return false;
+		
+		if (used == null) return false;
+		if (used.size() == 0) return false;
+		
+		// only 1 one context has been used, see if it's the first in the list
+		if (used.size() == 1) {
+			if (used.get(0).equals(container.get(0)) == true) {
+				return true;
+			}
+		}
+		
+		for (String ctx: used) {
+			log.trace("Looking for value [{}] in list.", ctx);
+			if (container.contains(ctx) == true) {
+				log.trace("Found value [{}] in list.", ctx);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	
+	/**
 	 * Get the list of context values that satisfy the source contexts based on what is in the container
 	 * list and child contexts that are also allowed for that context.
 	 * @param source The list of context values we need to satisfy.
