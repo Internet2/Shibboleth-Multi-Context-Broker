@@ -356,24 +356,24 @@ public class MCBLoginServlet extends HttpServlet {
 	    		
 				// -----------------------------
 				
-//				// if there are no valid contexts, then the SP did not ask for one, so anything used is valid
-//				if ((valid == true) || (validContexts.size() == 0)) {
-//					log.debug("Simple case met. The used context is in the requested list for principal [{}]", principal.getName());
-//					// set the authentication context that was used
-//					principal.setCurrentContexts(usedContextList); // save the context values used
-//					// we must figure out if the user actually used a requested context or one that satisfied it by configuration
-//					if (validContexts.size() == 0) {
-//						request.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, usedContextList.get(0));
-//					} else {
-//						// they used an upgraded one, we must send back the proper matching requested value, not what we used
-//						String ctx = mcbConfig.getUpgradedContext(usedContextList, requestedContexts);
-//						request.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, ctx);
-//					}
-//					request.setAttribute(LoginHandler.PRINCIPAL_KEY, principal);
-//					request.setAttribute(LoginHandler.AUTHENTICATION_INSTANT_KEY, new DateTime());
-//					AuthenticationEngine.returnToAuthenticationEngine(request, response);
-//					return true;
-//				}
+				// if there are no valid contexts, then the SP did not ask for one, so anything used is valid
+				if ((valid == true) && (requestedContexts.size() == 0)) {
+					log.debug("No context requested for principal [{}]. Returning success.", principal.getName());
+					// set the authentication context that was used
+					principal.setCurrentContexts(usedContextList); // save the context values used
+					// we must figure out if the user actually used a requested context or one that satisfied it by configuration
+					if (validContexts.size() == 0) {
+						request.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, usedContextList.get(0));
+					} else {
+						// they used an upgraded one, we must send back the proper matching requested value, not what we used
+						String ctx = mcbConfig.getUpgradedContext(usedContextList, requestedContexts);
+						request.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, ctx);
+					}
+					request.setAttribute(LoginHandler.PRINCIPAL_KEY, principal);
+					request.setAttribute(LoginHandler.AUTHENTICATION_INSTANT_KEY, new DateTime());
+					AuthenticationEngine.returnToAuthenticationEngine(request, response);
+					return true;
+				}
 				// the user must re-authenticate with one of the requested contexts and its associated method
 				log.debug("Principal [{}] must authenticate with a different context.", principal.getName());
 				// check 4 -- does the user have a potential context that is on the requested list? if not, they fail always
