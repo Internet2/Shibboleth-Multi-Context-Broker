@@ -357,7 +357,7 @@ public class MCBLoginServlet extends HttpServlet {
 				// -----------------------------
 				
 				// if there are no valid contexts, then the SP did not ask for one, so anything used is valid
-				if ((valid == true) && (requestedContexts.size() == 0)) {
+				if ((valid == false) && (requestedContexts.size() == 0)) {
 					log.debug("No context requested for principal [{}]. Returning success.", principal.getName());
 					// set the authentication context that was used
 					principal.setCurrentContexts(usedContextList); // save the context values used
