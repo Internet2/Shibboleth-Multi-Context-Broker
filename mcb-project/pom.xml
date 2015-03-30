@@ -4,7 +4,7 @@
 
 	<groupId>edu.internet2.middleware.assurance.mcb</groupId>
 	<artifactId>multi-context-broker</artifactId>
-	<version>1.2.3</version>
+	<version>1.2.4</version>
 	<packaging>jar</packaging>
 
 	<name>multi-context-broker</name>
