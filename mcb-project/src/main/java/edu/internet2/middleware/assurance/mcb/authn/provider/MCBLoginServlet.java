@@ -339,7 +339,7 @@ public class MCBLoginServlet extends HttpServlet {
 	    				matchedContexts.add(context);
 	    				break; // once we find a match, we can stop
 	    			} else {
-	    				log.debug("Adding context [{}} to the missing list", context);
+	    				log.debug("Adding context [{}] to the missing list", context);
 	    				missingContexts.add(context);
 	    			}
 	    		}
@@ -352,6 +352,22 @@ public class MCBLoginServlet extends HttpServlet {
 					request.setAttribute(LoginHandler.PRINCIPAL_KEY, principal);
 					AuthenticationEngine.returnToAuthenticationEngine(request, response);
 					return true;
+	    		}
+	    		
+	    		// if we have something matched, we need to check for the case of when the SP
+	    		// requested multiple contexts and the user cannot satisfy all of them
+	    		if (matchedContexts.size() > 0) {
+	    			// now see if the user was allowed the missing context
+	    			valid = mcbConfig.isValid(principal.getPotentialContexts(), missingContexts);
+	    			if (valid == false) {
+	    				// none of the missing ones were allowed anyway, pass authentication
+		    			// use the highest context value matched
+						log.debug("Missing context not allowed for user. A used context [{}] is in the requested list for principal [{}]", matchedContexts.get(matchedContexts.size()-1), principal.getName());
+						request.setAttribute(LoginHandler.AUTHENTICATION_METHOD_KEY, matchedContexts.get(matchedContexts.size()-1));
+						request.setAttribute(LoginHandler.PRINCIPAL_KEY, principal);
+						AuthenticationEngine.returnToAuthenticationEngine(request, response);
+						return true;
+	    			}
 	    		}
 	    		
 				// -----------------------------
