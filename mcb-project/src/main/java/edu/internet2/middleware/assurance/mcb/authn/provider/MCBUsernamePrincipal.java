@@ -149,4 +149,29 @@ public class MCBUsernamePrincipal implements Principal, Serializable {
 		this.currentContexts = currentContexts;
 	}
 
+	public String getDebugInfo() {
+		StringBuilder sb = new StringBuilder();
+		String eol = System.getProperty("line.separator");;
+		sb.append("principal name = [" + this.principalName + "]" + eol);
+		sb.append("failed login = [" + this.failedLogin + "]" + eol);
+		sb.append("failed count = [" + this.failedCount + "]" + eol);
+		if (this.potentialContexts == null) {
+			sb.append("potential contexts are null" + eol);
+		} else {
+			sb.append("potential context count = [" + this.potentialContexts.size() + "]" + eol);
+			for (String ctx: this.potentialContexts) {
+				sb.append("  potential context = [" + ctx + "]" + eol);
+			}
+		}
+		if (this.currentContexts == null) {
+			sb.append("current contexts are null" + eol);
+		} else {
+			sb.append("current context count = [" + this.currentContexts.size() + "]" + eol);
+			for (String ctx: this.currentContexts) {
+				sb.append("  current context = [" + ctx + "]" + eol);
+			}
+		}
+		
+		return sb.toString();
+	}
 }

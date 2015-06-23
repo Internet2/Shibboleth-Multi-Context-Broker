@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opensaml.common.SAMLObject;
+import org.opensaml.ws.transport.InTransport;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,6 +151,8 @@ public class MCBAttributeResolver {
 
         requestContext.setRelyingPartyConfiguration(relyingPartyConfiguration);
         requestContext.setInboundMessageIssuer(relyingPartyId);
+        // TODO -- create the InTransport
+        requestContext.setInboundMessageTransport(new HttpServletRequestAdapter(request));
         requestContext.setOutboundMessageIssuer(idpId);
         requestContext.setPrincipalName(principalName);
         requestContext.setLocalEntityId(idpId);

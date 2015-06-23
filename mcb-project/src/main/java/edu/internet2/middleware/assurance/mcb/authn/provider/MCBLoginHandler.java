@@ -144,10 +144,14 @@ public class MCBLoginHandler extends AbstractLoginHandler {
 		    			principal = (MCBUsernamePrincipal) p;
 		    		}
 		    	}
+	            if (log.isTraceEnabled() == true) {
+	            	log.trace(principal.getDebugInfo());
+	            }
+	            // TODO
 		    	// if we get a forceAuthn, by design we will reset the session entirely to
 		    	// no satisfying contexts, so we retain the principal but no information about them
 		    	principal.getCurrentContexts().clear();
-		    	principal.getPotentialContexts().clear();
+		    	//principal.getPotentialContexts().clear();
 		    	principal.setFailedCount(0);
 		    	// save the original principal name, we don't allow it to change (typically)
 		    	userSession.setAttribute(MCBLoginServlet.ORIGINAL_PRINCIPAL_NAME, principal.getName());
